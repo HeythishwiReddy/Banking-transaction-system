@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, jsonify, request, session
 from functools import wraps
 from db import connect
@@ -674,118 +673,93 @@ def monthly_report():
         close_db(cursor, con)
 
 
-# -------------------- ACCOUNT SUMMARY --------------------
+# -------------------- ACCOUNT-TYPE MONTHLY REPORT --------------------
 
-@app.route("/api/reports/account-summary", methods=["GET"])
+@app.route("/api/reports/account-type-monthly", methods=["GET"])
 @api_login_required
-def account_summary():
+def account_type_monthly_report():
     con = cursor = None
 
     try:
         con = connect()
         cursor = create_cursor(con)
 
+        current_year = datetime.now().year
+
         if is_admin():
             condition = ""
-            params = ()
+            params = (current_year,)
         else:
-            condition = "WHERE c.user_id = %s"
-            params = (session["user_id"],)
+            condition = "AND c.user_id = %s"
+            params = (current_year, session["user_id"])
 
         cursor.execute(f"""
             SELECT
-                a.account_id,
-                a.customer_id,
                 a.account_type,
-                COUNT(t.transaction_id) AS total_transactions,
-                COALESCE(SUM(
-                    CASE WHEN t.transaction_type = 'DEPOSIT'
-                    THEN t.amount ELSE 0 END
-                ), 0) AS total_deposits,
-                COALESCE(SUM(
-                    CASE WHEN t.transaction_type = 'WITHDRAWAL'
-                    THEN t.amount ELSE 0 END
-                ), 0) AS total_withdrawals
-            FROM accounts a
+                MONTH(t.transaction_date) AS month_number,
+                t.transaction_type,
+                COALESCE(SUM(t.amount), 0) AS total_amount
+            FROM transactions t
+            JOIN accounts a ON t.account_id = a.account_id
             JOIN customers c ON a.customer_id = c.customer_id
-            LEFT JOIN transactions t ON a.account_id = t.account_id
+            WHERE YEAR(t.transaction_date) = %s
             {condition}
-            GROUP BY a.account_id, a.customer_id, a.account_type
-            ORDER BY a.account_id
+            GROUP BY
+                a.account_type,
+                MONTH(t.transaction_date),
+                t.transaction_type
+            ORDER BY
+                a.account_type,
+                month_number
         """, params)
 
         rows = cursor.fetchall()
 
-        for row in rows:
-            row["total_transactions"] = int(row["total_transactions"])
-            row["total_deposits"] = float(row["total_deposits"])
-            row["total_withdrawals"] = float(row["total_withdrawals"])
+        months = [
+            "January", "February", "March", "April",
+            "May", "June", "July", "August",
+            "September", "October", "November", "December"
+        ]
 
-        return jsonify(rows), 200
+        report = {
+            "year": current_year,
+            "SAVINGS": {
+                "months": months,
+                "deposits": [0.0] * 12,
+                "withdrawals": [0.0] * 12
+            },
+            "CURRENT": {
+                "months": months,
+                "deposits": [0.0] * 12,
+                "withdrawals": [0.0] * 12
+            }
+        }
+
+        for row in rows:
+            account_type = row["account_type"]
+            month_index = int(row["month_number"]) - 1
+            transaction_type = row["transaction_type"]
+            amount = float(row["total_amount"])
+
+            if account_type not in report:
+                continue
+
+            if transaction_type == "DEPOSIT":
+                report[account_type]["deposits"][month_index] = amount
+
+            elif transaction_type == "WITHDRAWAL":
+                report[account_type]["withdrawals"][month_index] = amount
+
+        return jsonify(report), 200
 
     except Exception:
-        app.logger.exception("Account summary error")
+        app.logger.exception("Account-type monthly report error")
         return jsonify({
-            "error": "Unable to generate account summary."
+            "error": "Unable to generate account-type monthly report."
         }), 500
 
     finally:
         close_db(cursor, con)
-
-
-# -------------------- TRANSACTION TYPE REPORT --------------------
-
-@app.route("/api/reports/transaction-types", methods=["GET"])
-@api_login_required
-def transaction_type_report():
-    con = cursor = None
-
-    try:
-        con = connect()
-        cursor = create_cursor(con)
-
-        if is_admin():
-            condition = ""
-            params = ()
-        else:
-            condition = """
-                WHERE account_id IN (
-                    SELECT a.account_id
-                    FROM accounts a
-                    JOIN customers c ON a.customer_id = c.customer_id
-                    WHERE c.user_id = %s
-                )
-            """
-            params = (session["user_id"],)
-
-        cursor.execute(f"""
-            SELECT
-                transaction_type,
-                COUNT(*) AS total_transactions,
-                COALESCE(SUM(amount), 0) AS total_amount
-            FROM transactions
-            {condition}
-            GROUP BY transaction_type
-            ORDER BY transaction_type
-        """, params)
-
-        rows = cursor.fetchall()
-
-        for row in rows:
-            row["total_transactions"] = int(row["total_transactions"])
-            row["total_amount"] = float(row["total_amount"])
-
-        return jsonify(rows), 200
-
-    except Exception:
-        app.logger.exception("Transaction type report error")
-        return jsonify({
-            "error": "Unable to generate transaction-type report."
-        }), 500
-
-    finally:
-        close_db(cursor, con)
-
 
 # -------------------- ADMIN ADD TRANSACTION --------------------
 
@@ -882,7 +856,96 @@ def admin_add_transaction():
         close_db(cursor, con)
 
 
+# -------------------- ACCOUNT-WISE SUMMARY --------------------
+
+@app.route("/api/reports/account-summary", methods=["GET"])
+@api_login_required
+def account_summary():
+    con = cursor = None
+
+    try:
+        con = connect()
+        cursor = create_cursor(con)
+
+        if is_admin():
+            condition = ""
+            params = ()
+        else:
+            condition = "WHERE c.user_id = %s"
+            params = (session["user_id"],)
+
+        cursor.execute(f"""
+            SELECT
+                a.account_id,
+                a.customer_id,
+                a.account_type,
+                COUNT(t.transaction_id) AS total_transactions,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN t.transaction_type = 'DEPOSIT'
+                        THEN t.amount
+                        ELSE 0
+                    END
+                ), 0) AS total_deposits,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN t.transaction_type = 'WITHDRAWAL'
+                        THEN t.amount
+                        ELSE 0
+                    END
+                ), 0) AS total_withdrawals,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN t.transaction_type = 'DEPOSIT'
+                        THEN t.amount
+                        WHEN t.transaction_type = 'WITHDRAWAL'
+                        THEN -t.amount
+                        ELSE 0
+                    END
+                ), 0) AS calculated_balance
+
+            FROM accounts a
+            JOIN customers c
+                ON a.customer_id = c.customer_id
+
+            LEFT JOIN transactions t
+                ON a.account_id = t.account_id
+
+            {condition}
+
+            GROUP BY
+                a.account_id,
+                a.customer_id,
+                a.account_type
+
+            ORDER BY a.account_id
+        """, params)
+
+        rows = cursor.fetchall()
+
+        for row in rows:
+            row["total_transactions"] = int(row["total_transactions"])
+            row["total_deposits"] = float(row["total_deposits"])
+            row["total_withdrawals"] = float(row["total_withdrawals"])
+            row["calculated_balance"] = float(row["calculated_balance"])
+
+        return jsonify(rows), 200
+
+    except Exception:
+        app.logger.exception("Account-wise summary error")
+        return jsonify({
+            "error": "Unable to generate account-wise summary."
+        }), 500
+
+    finally:
+        close_db(cursor, con)
+
+
+
 # -------------------- RUN APPLICATION --------------------
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)        
