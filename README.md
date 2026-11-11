@@ -1,52 +1,182 @@
-# Banking Transaction Analysis System
-**Project 16 — Intermediate | Educational simulation only**
+# VaultView – Banking Transaction Management and Analysis System
 
-Stores synthetic customers, accounts and transactions in MySQL. Python validates deposits/withdrawals; Pandas and NumPy generate summaries; Matplotlib creates charts.
+A web-based educational project for managing banking transactions and analysing account activity using Python, Flask, MySQL, Pandas, and NumPy.
 
-**Safety:** Do not use real banking data, credentials, or sensitive financial information. Balances are simulated (`deposits - withdrawals`). A review flag is not a fraud determination.
+## Project Overview
 
-## Setup
-1. Install MySQL 8+ and Python 3.10+.
-2. In MySQL, create a database and dedicated local user:
-```sql
-CREATE DATABASE banking_analysis CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'banking_app'@'localhost' IDENTIFIED BY 'ChangeThisLocalPassword!';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX ON banking_analysis.* TO 'banking_app'@'localhost';
-FLUSH PRIVILEGES;
+VaultView is an educational banking transaction management and analysis system developed to demonstrate how banking records can be stored, managed, and analysed.
+
+The application allows users to manage accounts, record deposits and withdrawals, view transaction history, and generate useful summaries and visual reports.
+
+> **Note:** This project is an educational simulation. It uses synthetic data and is not a real banking application.
+
+## Key Features
+
+- **User Authentication** – Login-based access to the application.
+- **Account Management** – View available customer accounts.
+- **Transaction Management** – Record deposits and withdrawals.
+- **Money Transfers** – Transfer funds between accounts.
+- **Transaction History** – View recorded account transactions.
+- **Dashboard** – Display important banking statistics.
+- **Financial Reports** – Generate deposit, withdrawal, and balance summaries.
+- **Data Visualisation** – Display transaction trends through charts.
+- **Transaction Review** – Flag selected transactions for review based on a configurable threshold.
+
+## Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| HTML, CSS, JavaScript | Frontend development |
+| Flask | Backend web framework |
+| Python | Application logic |
+| MySQL | Database management |
+| Pandas | Data analysis |
+| NumPy | Numerical operations |
+| Chart.js | Dashboard visualisations |
+
+## System Modules
+
+1. **Frontend Module** – Provides the user interface and dashboard.
+2. **Backend Module** – Handles application logic and transaction processing.
+3. **Database Module** – Stores customer, account, and transaction records.
+4. **Analysis Module** – Calculates summaries and analyses transaction data.
+5. **Integration and Testing Module** – Connects the application components and checks system functionality.
+
+## Database Structure
+
+The project uses MySQL with the following main tables:
+
+- `customers` – Stores customer information.
+- `accounts` – Stores account details.
+- `transactions` – Stores deposit and withdrawal records.
+
+The database name used by the project is `banking_analysis`.
+
+## Installation and Setup
+
+### Prerequisites
+
+- Python 3.10 or later
+- MySQL Server 8.0 or later
+- Visual Studio Code (recommended)
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-repository-url>
+cd <your-project-folder>
 ```
-3. Copy `.env.example` to `.env` and set the password to the one you chose.
-4. Install dependencies: `python -m pip install -r requirements.txt`
-5. Create tables and seed synthetic data:
-   - `python main.py init`
-   - `python main.py seed`
-6. Try:
-   - `python main.py accounts`
-   - `python main.py history 1001`
-   - `python main.py deposit 1001 500 "Sample deposit"`
-   - `python main.py withdraw 1001 125 "Sample withdrawal"`
-   - `python main.py reports`
-   - `python main.py charts`
-   - `python main.py flags`
-   - `python main.py` for interactive menu
 
-The demo seed creates synthetic records. Use `accounts` to check account IDs rather than assuming IDs if the database already contains data.
+### 2. Create the Database
 
-## Outputs
-CSV files are saved in `reports/`; PNG charts are saved in `charts/`. The default review threshold is 10,000 and can be changed in `.env`. The rule is only an educational review example and can produce false positives or miss unusual activity.
+Open MySQL Workbench and execute:
 
-## Tables
-`customers(customer_id, display_name)`, `accounts(account_id, customer_id, account_type)`, and `transactions(transaction_id, account_id, transaction_date, transaction_type, amount, description)`.
+```sql
+CREATE DATABASE banking_analysis;
+```
 
+### 3. Configure Environment Variables
 
-## Web frontend
+Copy `.env.example` to `.env` and update the database configuration with your local MySQL credentials.
 
-1. Edit `.env` and set `DB_NAME=banking_transcations` if that is the database you created in MySQL Workbench. Ensure `DB_USER` and `DB_PASSWORD` match your MySQL user.
-2. Install dependencies: `python -m pip install -r requirements.txt`
-3. Initialize tables and add synthetic sample data: `python main.py init` then `python main.py seed`
-4. Start the local web app: `python app.py`
-5. Open `http://127.0.0.1:5000` in your browser.
+Example:
 
-This is an educational simulation. Use synthetic data only. Balances are simulated.
+```env
+DB_NAME=banking_analysis
+DB_USER=your_mysql_username
+DB_PASSWORD=your_mysql_password
+REVIEW_THRESHOLD=10000
+```
+
+Keep your `.env` file private. Never upload database passwords or secret keys to GitHub.
+
+### 4. Install Dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 5. Initialise the Database
+
+```bash
+python main.py init
+python main.py seed
+```
+
+These commands create the required tables and insert synthetic sample data.
+
+### 6. Run the Application
+
+```bash
+python app.py
+```
+
+Open your browser and visit:
+
+```text
+http://127.0.0.1:5000
+```
+
+## Project Safety and Limitations
+
+- The application is designed for educational purposes only.
+- Use synthetic sample data, not real customer or banking information.
+- Account balances are simulated using deposits minus withdrawals.
+- Transaction review flags indicate records that may need attention; they do not establish fraud.
+- The application is not intended for real financial transactions.
+
+## Project Information
+
+| Detail | Information |
+|---|---|
+| Project Name | VaultView |
+| Project Title | Banking Transaction Management and Analysis System |
+| Institution | Mohan Babu University |
+| Department | Computer Science and Engineering |
+| Project Guide | Mohamad Valli |
+| Student | B. Heythishwi |
+
+## Team Contributions
+
+This project was developed collaboratively by a team of five members. Each member was responsible for a specific module.
+
+| Team Member | Responsibility | Contribution |
+|---|---|---|
+| Member 1 | Database Management | Designed MySQL tables, relationships, primary keys, foreign keys, and database constraints. |
+| Member 2 | Backend Development | Developed Python database operations and implemented deposit, withdrawal, and transaction processing. |
+| Member 3 | Data Analysis | Used Pandas and NumPy to calculate transaction totals, summaries, and monthly trends. |
+| Member 4 | Frontend and Visualisation | Developed the user interface and created charts and visual representations of transaction data. |
+| **B. Heythishwi (Member 5)** | **Integration and Testing** | **Integrated the frontend, backend, database, and analysis modules. Tested login, account viewing, deposits, withdrawals, transaction history, reports, input validation, data flow, and error handling. Identified issues and verified fixes to ensure the system worked correctly.** |
+
+### My Individual Contribution – B. Heythishwi
+
+My primary responsibility was **Integration and Testing**. My work included:
+
+- Connecting the frontend with the Flask backend.
+- Ensuring communication between Python and the MySQL database.
+- Integrating transaction and data analysis modules.
+- Testing account viewing and transaction operations.
+- Checking input validation and error handling.
+- Verifying reports and transaction summaries.
+- Identifying integration issues and checking their fixes.
+
+Through this work, I helped ensure that all project modules functioned together as a complete application.
+
+## Future Enhancements
+
+- Improved dashboard and reporting features.
+- More advanced transaction analysis.
+- Enhanced user access controls.
+- Additional data visualisation options.
+- Improved validation and testing.
+
+## Acknowledgement
+
+We sincerely thank our project guide, **Mohamad Valli**, and **Mohan Babu University** for their guidance and support throughout the development of this project.
+
+---
+
+**VaultView – Turning Banking Transactions into Meaningful Insights.**
 
 ## Project Link
 
