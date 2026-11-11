@@ -186,3 +186,15 @@ We sincerely thank our project guide, **Mohamad Valli**, and **Mohan Babu Univer
 ## Demo Link
 
 https://banking-transaction-system-2w5r.onrender.com
+
+
+## Demo Access
+
+VaultView supports two user roles:
+
+- **Admin:** Access to administrative features and system-level management.
+- **User:** Access to personal account details and transaction history.
+
+For demonstration access, please contact the project developer.
+
+**Security:** Login credentials and database configuration are not included in this public repository.
