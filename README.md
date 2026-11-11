@@ -178,6 +178,6 @@ We sincerely thank our project guide, **Mohamad Valli**, and **Mohan Babu Univer
 
 **VaultView – Turning Banking Transactions into Meaningful Insights.**
 
-## Project Link
+## Demo Link
 
 https://banking-transaction-system-2w5r.onrender.com
