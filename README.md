@@ -49,7 +49,7 @@ The project uses MySQL with the following main tables:
 - `customers` – Stores customer information.
 - `accounts` – Stores account details.
 - `transactions` – Stores deposit and withdrawal records.
-- 'users' -stores admin account and users accounts
+- users -stores admin account and users accounts
 
 The database name used by the project is `banking_analysis`.
 
