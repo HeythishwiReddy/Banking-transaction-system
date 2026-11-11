@@ -21,6 +21,10 @@ The application allows users to manage accounts, record deposits and withdrawals
 - **Financial Reports** – Generate deposit, withdrawal, and balance summaries.
 - **Data Visualisation** – Display transaction trends through charts.
 - **Transaction Review** – Flag selected transactions for review based on a configurable threshold.
+- **Role-Based Login System** – Separate Admin and User accounts with role-based access permissions.
+- **Admin Dashboard** – Provides administrative access to system-level operations.
+- **User Dashboard** – Allows users to access their associated account information and transactions.
+
 
 ## Technologies Used
 
